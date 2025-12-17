@@ -1,0 +1,138 @@
+﻿@page
+@model Authelp.Pages.HelpModel
+@{
+    ViewData["Title"] = "Help Center";
+}
+
+<h2 class="text-center mb-4">Welcome to the AutHelp Help Area</h2>
+
+<p class="text-center">
+    Here you can download useful documents to assist you.<br />
+    Need more help? Visit our <a asp-page="/Contact">Contact Page</a>.
+</p>
+
+<style>
+    .float-img {
+        float: right;
+        margin-left: 20px;
+        margin-bottom: 10px;
+        width: 560px;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
+
+    .addresses-container {
+        background-color: rgba(208, 232, 255, 0.4); 
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+        .addresses-container p {
+            margin-bottom: 15px; 
+        }
+
+        .addresses-container strong {
+            color: #1f1f1f;
+        }
+</style>
+
+<img src="~/images/autism.jpg" class="float-img" alt="Help Center" />
+
+<div class="addresses-container">
+    <h3>Autism & Special Needs Help Centers in Jamaica</h3>
+
+    <p>
+        <strong>Jamaica Autism Support Association (JASA)</strong><br />
+        Kingston YMCA, 21 Hope Road, Kingston 10, St. Andrew<br />
+        Phone: 876-776-6827 / 876-354-4894
+    </p>
+
+    <p>
+        <strong>Montego Bay Autism Center</strong><br />
+        12B Clegg Close, Appleton Hall, Post Office #1, Montego Bay, St. James<br />
+        Phone: 876-630-7506
+    </p>
+
+    <p>
+        <strong>Jamaica Autism Academy</strong><br />
+        7 Tucker Avenue, Kingston 6<br />
+        Additional location: 19 Palladium Drive, Horizon Park, St. Catherine<br />
+        Phone: 876-286-5173 / 876-672-0203 / 876-667-0191
+    </p>
+
+    <p>
+        <strong>Harmony Therapy & Learning Centre</strong><br />
+        33–39 Portmore Drive, Portmore, St. Catherine<br />
+        Phone: 876-835-8403
+    </p>
+
+    <p>
+        <strong>The Mico CARE Centre</strong><br />
+        5 Manhattan Road, Kingston 5<br />
+        Phone: 876-929-7720-2
+    </p>
+
+    <p>
+        <strong>McCam Child Development & Resource Centre</strong><br />
+        231 Old Hope Road, Kingston 6<br />
+        Phone: 876-977-0189
+    </p>
+
+    <p>
+        <strong>Early Stimulation Programme (ESP)</strong><br />
+        95 Hanover Street, Kingston<br />
+        Phone: 876-922-5585
+    </p>
+
+    <p>
+        <strong>Jamaica Council for Persons with Disabilities (JCPD)</strong><br />
+        National Advocacy & Support<br />
+        Phone: 876-968-8373
+    </p>
+</div>
+
+<hr />
+
+<div class="container" style="max-width: 600px;">
+    <h4>Upload a Document</h4>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="Upload">
+        <div class="mb-3">
+            <input type="file" asp-for="UploadFile" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Upload File</button>
+    </form>
+
+    <hr />
+
+    <h4>Download Documents</h4>
+
+    @if (Model.UploadedFiles.Count == 0)
+    {
+        <p>No documents uploaded yet.</p>
+    }
+    else
+    {
+        <ul class="list-group mt-3">
+            @foreach (var file in Model.UploadedFiles)
+            {
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>@file</span>
+                    <a asp-page="/Help" asp-page-handler="Download" asp-route-filename="@file"
+                       class="btn btn-sm btn-success">Download</a>
+                </li>
+            }
+        </ul>
+    }
+</div>

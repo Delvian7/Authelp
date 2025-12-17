@@ -1,0 +1,166 @@
+﻿@page
+@model Authelp.Pages.Dashboard.IndexModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2 class="text-center mb-4">Dashboard</h2>
+
+<a asp-page="/Dashboard/Messages" class="btn btn-primary">
+    Messages
+</a>
+
+
+
+
+<div class="card p-3 mb-4">
+    <h3>Update Profile</h3>
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="UploadPhoto">
+        <label>Upload Profile Photo:</label>
+        <input type="file" name="ProfileUpload" class="form-control mb-2" />
+
+        <button type="submit" class="btn btn-secondary">Upload</button>
+    </form>
+
+    @if (Model.UserProfile != null && !string.IsNullOrWhiteSpace(Model.UserProfile.ProfileImage))
+    {
+        <h3>Current Photo:</h3>
+        <img src="@Model.UserProfile.ProfileImage"
+        style="width:120px;height:120px;border-radius:50%;object-fit:cover;" />
+    }
+
+
+    <form method="post" asp-page-handler="UpdateProfile">
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="form-group mb-2">
+            <label>Name</label>
+            <input asp-for="Name" class="form-control" />
+        </div>
+
+        <div class="form-group mb-2">
+            <label>Email</label>
+            <input asp-for="Email" class="form-control" />
+        </div>
+
+        <div class="form-group mb-2">
+            <label>Phone</label>
+            <input asp-for="Phone" class="form-control" />
+        </div>
+
+        <div class="form-group mb-2">
+            <label>New Password (optional)</label>
+            <input asp-for="Password" class="form-control" type="password" />
+        </div>
+
+        <button class="btn btn-primary mt-2">Update Profile</button>
+    </form>
+</div>
+
+
+@if (Model.UserProfile?.Role == "parent")
+{
+
+    <div class="card p-3 mb-4">
+        <h3>Add Child</h3>
+
+        <form method="post" asp-page-handler="AddChild">
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group mb-2">
+                <label>Child Name</label>
+                <input asp-for="NewChildName" class="form-control" />
+            </div>
+
+            <div class="form-group mb-2">
+                <label>Condition</label>
+                <input asp-for="NewChildCondition" class="form-control" />
+            </div>
+
+            <button class="btn btn-success mt-2">Add Child</button>
+        </form>
+    </div>
+
+}
+
+@if (Model.UserProfile?.Role == "parent")
+{
+
+
+    <div class="card p-3">
+        <h3>Your Children</h3>
+
+        @if (Model.Children.Count == 0)
+        {
+            <p>No children added yet.</p>
+        }
+        else
+        {
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Condition</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var child in Model.Children)
+                    {
+                        <tr>
+                            <td>
+                                <form method="post" asp-page-handler="UpdateChild" class="row g-2">
+                                    <input type="hidden" name="ChildId" value="@child.Id" />
+
+                                    <div class="col-md-4">
+                                        <input name="ChildName" value="@child.ChildName" class="form-control" />
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <input name="ChildCondition" value="@child.ChildCondition" class="form-control" />
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <button class="btn btn-warning btn-sm">Update</button>
+                                    </div>
+                                </form>
+                            </td>
+
+                            <td>
+                                <form method="post" asp-page-handler="DeleteChild">
+                                    <input type="hidden" name="childId" value="@child.Id" />
+                                    <button class="btn btn-danger btn-sm mt-2">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    
+
+
+
+    <hr />
+
+    <div style="text-align:center; margin-top:20px;">
+        <form method="post" onsubmit="return confirmDeleteAccount();">
+            <button type="submit" asp-page-handler="DeleteAccount"
+                    style="background-color:blue; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">
+                Delete My Account
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function confirmDeleteAccount() {
+            const first = confirm("Are you sure you want to delete your account? This cannot be undone.");
+            if (!first) return false;
+            const second = confirm("This is your last chance. Confirm you want to permanently delete your account.");
+            return second;
+        }
+    </script>
+
+
+}

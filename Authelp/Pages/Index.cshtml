@@ -1,0 +1,214 @@
+﻿@page
+@model Authelp.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home";
+    bool isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
+}
+
+
+
+
+<div class="disclaimer-container">
+    <marquee behavior="scroll" direction="left" scrollamount="5">
+        ⚠️ ⚠️ WARNING: Only share details you are comfortable with. Do NOT share your location, personal address, or sensitive information with anyone. Always communicate respectfully and safely within the AutHelp network. This platform is designed to support parents and helpers of children with autism. Remember: your safety and privacy come first. ⚠️
+        ⚠️
+    </marquee>
+</div>
+
+
+
+<div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+    <h1 style="color: #8b4513; font-weight: bold;">WELCOME TO AUTHELP</h1>
+    <p style="color: black; font-size: 1.2rem; font-weight: bold;">
+        YOUR SUPPORT NETWORK FOR YOUR CHILDREN WITH AUTISM.
+    </p>
+</div>
+
+@if (isLoggedIn)
+{
+    <div class="mb-2">
+        <a class="btn btn-primary" asp-page="/Messages" asp-route-ChatWithId="3">
+            Chat
+        </a>
+    </div>
+}
+
+
+
+<div style="text-align:right; margin:10px 20px;">
+    <button id="pauseReorderBtn"
+            style="background-color:#007bff;
+                   color:white;
+                   border:none;
+                   padding:5px 10px;
+                   font-size:0.8rem;
+                   border-radius:6px;">
+        Pause Reorder
+    </button>
+</div>
+
+
+
+
+
+
+<div style="display:flex; gap:24px; flex-wrap:wrap;">
+
+    
+    <div style="flex:1; min-width:300px;">
+        <h2 class="text-center">PARENTS</h2>
+
+        <div id="parents-list">
+            @foreach (var p in Model.Parents)
+            {
+                <div class="user-card"
+                     onclick="location.href='@Url.Page(isLoggedIn ? "/Users/Details" : "/Account/Login", new { id = p.Id })'">
+
+                    <div class="row g-0">
+
+                       
+                        <div class="col-md-6">
+                            @if (isLoggedIn)
+                            {
+                                <h3>@p.Name</h3>
+                                <p><strong>Email:</strong> @p.Email</p>
+                                <p><strong>Phone:</strong> @p.Phone</p>
+
+                                @if (p.Children != null && p.Children.Any())
+                                {
+                                    <h5>Children:</h5>
+                                    <ul>
+                                        @foreach (var c in p.Children)
+                                        {
+                                            <li>@c.ChildName - @c.ChildCondition</li>
+                                        }
+                                    </ul>
+                                }
+                            }
+                            else
+                            {
+                                <h4>Login to view details</h4>
+                            }
+                        </div>
+
+                        
+                        <div class="col-md-6 text-center">
+                            <img src="@(string.IsNullOrWhiteSpace(p.ProfileImage)
+                                ? "/images/default-user.png"
+                                : p.ProfileImage)"
+                                 class="profile-photo-large" />
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    
+    <div style="flex:1; min-width:300px;">
+        <h2 class="text-center">HELPERS</h2>
+
+        <div id="helpers-list">
+            @foreach (var h in Model.Helpers)
+            {
+                <div class="user-card"
+                     onclick="location.href='@Url.Page(isLoggedIn ? "/Users/Details" : "/Account/Login", new { id = h.Id })'">
+
+                    <div class="row g-0">
+
+                        
+                        <div class="col-md-6">
+                            @if (isLoggedIn)
+                            {
+                                <h3>@h.Name</h3>
+                                <p><strong>Email:</strong> @h.Email</p>
+                                <p><strong>Phone:</strong> @h.Phone</p>
+                            }
+                            else
+                            {
+                                <h4>Login to view details</h4>
+                            }
+                        </div>
+
+                        
+                        <div class="col-md-6 text-center">
+                            <img src="@(string.IsNullOrWhiteSpace(h.ProfileImage)
+                                ? "/images/default-user.png"
+                                : h.ProfileImage)"
+                                 class="profile-photo-large" />
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .user-card {
+        background-color: rgba(255, 102, 102, 0.6) !important;
+        padding: 12px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+    }
+
+        .user-card:hover {
+            box-shadow: 0 0 12px rgba(0, 123, 255, 0.7);
+            transform: translateY(-4px);
+        }
+
+    .profile-photo-large {
+        width: 100%;
+        max-height: 220px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<script>
+    let autoReorder = true;
+    let reorderInterval;
+
+    function reorderAll() {
+        shuffleCards("parents-list");
+        shuffleCards("helpers-list");
+    }
+
+    function shuffleCards(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        let cards = Array.from(container.children);
+
+        for (let i = cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cards[i], cards[j]] = [cards[j], cards[i]];
+        }
+
+        cards.forEach(card => container.appendChild(card));
+    }
+
+    document.getElementById("pauseReorderBtn").addEventListener("click", () => {
+        autoReorder = !autoReorder;
+
+        document.getElementById("pauseReorderBtn").innerText =
+            autoReorder ? "Pause Reorder" : "Resume Reorder";
+
+        reorderAll(); 
+    });
+
+    function startAuto() {
+        reorderInterval = setInterval(() => {
+            if (autoReorder) reorderAll();
+        }, 7000);
+    }
+
+    startAuto();
+</script>

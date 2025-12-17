@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] -Welcome to AUTHELP</title>
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" />
+    
+    
+
+
+    
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+
+  
+   
+
+</head>
+
+
+
+<body class="d-flex flex-column min-vh-100">
+
+    
+    <header>
+
+       
+
+
+
+        <div class="container py-3 d-flex justify-content-between align-items-center">
+            <a class="navbar-brand fw-bold text-center" href="/">AUTHELP</a>
+
+
+            
+
+
+
+            <nav>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">HOME</a>
+                    </li>
+
+                    @if (User?.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Dashboard/Index">DASHBOARD</a>
+                        </li>
+                       
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Testimonials">TESTIMONIALS</a>
+                        </li>
+
+                        <li class="nav-item"><a class="nav-link" href="/AboutUs">ABOUT US</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="/Contact">CONTACT US</a></li>
+
+                        <li class="nav-item"><a class="nav-link" href="/Help">HELP DESK</a></li>
+
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Account/Logout">LOGOUT</a>
+                        </li>
+                      
+                    
+
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Account/Login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Account/Register">Register</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+
+        
+
+
+
+    </header>
+
+
+
+   
+    <main role="main" class="flex-fill container">
+        @RenderBody()
+
+
+
+    </main>
+
+   
+    
+    <footer class="footer bg-light border-top mt-auto">
+        <div class="container text-center py-3">
+            &copy; @DateTime.Now.Year Authelp. All rights reserved.
+        </div>
+    </footer>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+	@RenderSection("Scripts", required: false)
+	@RenderBody()
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,95 @@
+﻿@page "{id:int}"
+@model Authelp.Pages.Users.DetailsModel
+
+
+
+<div style="background-color: rgba(173, 216, 230, 0.2); padding:15px; border-radius:8px;">
+<div class="user-details text-center mb-4">
+    <img src="@(!string.IsNullOrWhiteSpace(Model.CurrentUser?.ProfileImage) ? Model.CurrentUser.ProfileImage : "/images/default-user.png")"
+         style="width:200px; height:200px; object-fit:cover; border-radius:8px; margin-bottom:15px;"
+         alt="Profile Picture" />
+
+    <h2>@Model.CurrentUser?.Name</h2>
+    <p>@Model.CurrentUser?.Email</p>
+</div>
+
+
+
+
+
+<h2>@Model.CurrentUser!.Name</h2>
+<p><strong>Email:</strong> @Model.CurrentUser!.Email</p>
+<p><strong>Phone:</strong> @Model.CurrentUser!.Phone</p>
+
+@if (Model.CurrentUser!.Role == "parent")
+{
+    <h3>Children</h3>
+    @if (Model.CurrentUser!.Children != null && Model.CurrentUser!.Children.Any())
+    {
+        <ul>
+            @foreach (var child in Model.CurrentUser!.Children)
+            {
+                <li>
+                    <strong>Name:</strong> @child.ChildName<br />
+                    <strong>Condition:</strong> @child.ChildCondition
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No children information available.</p>
+    }
+}
+
+<hr />
+
+<h3>Unread Messages</h3>
+@if (Model.UnreadMessages.Any())
+{
+    <div style="border:1px solid #ccc; padding:10px; max-width:300px;">
+        @foreach (var m in Model.UnreadMessages)
+        {
+            <div style="padding:5px; border-bottom:1px solid #eee;">
+                <strong>@m.Sender!.Name</strong> sent you a message
+                <br />
+                <a asp-page="/Users/Details" asp-route-id="@m.SenderId">Reply</a>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No new messages.</p>
+}
+
+<hr />
+
+<h3>Conversation</h3>
+ <div style="border:1px solid #ccc; padding:10px; max-height:300px; overflow-y:auto;">
+    @foreach (var m in Model.Conversation)
+    {
+        <div style="margin-bottom:5px;
+                    background:@(m.SenderId == Model.LoggedInUserId ? "#def" : "#eee");
+                    padding:5px; border-radius:5px; max-width:80%;">
+            <strong>@(m.SenderId == Model.LoggedInUserId ? "You" : m.Sender?.Name):</strong>
+            <br />
+            @m.Text
+            <br />
+            <small>@m.SentAt.ToLocalTime().ToString("g")</small>
+            </div>
+    }
+</div>
+
+<form method="post" style="margin-top:10px;">
+    <textarea asp-for="MessageText" rows="3" style="width:100%; padding:5px; border-radius:5px;"></textarea>
+    <button type="submit" style="margin-top:5px; padding:5px 10px;">Send</button>
+</form>
+
+@if (Model.SuccessMessage != null)
+{
+    <p style="color:green">@Model.SuccessMessage</p>
+}
+
+
+            </div>

@@ -1,0 +1,232 @@
+﻿@page
+@model Authelp.Pages.Testimonials.IndexModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+@{
+    ViewData["Title"] = "Testimonials";
+    var token = Antiforgery.GetAndStoreTokens(HttpContext).RequestToken;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        margin: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    #testimonials-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 20px;
+        max-width: 900px;
+        margin: 0 auto 30px;
+    }
+
+    .testimonial-card {
+        width: 220px;
+        min-height: 220px;
+        border-radius: 50%;
+        background-color: #D0E8FF;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        border: 2px solid #B0D4FF;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+        .testimonial-card img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+
+        .testimonial-card strong {
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+
+        .testimonial-card p {
+            font-size: 0.85em;
+            line-height: 1.2em;
+        }
+
+        .testimonial-card button {
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            background-color: red;
+            color: white;
+        }
+
+    #testimonial-form {
+        margin-top: 30px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+        #testimonial-form textarea {
+            width: 100%;
+            padding: 8px;
+            font-size: 0.9em;
+        }
+
+        #testimonial-form button, #pause-btn {
+            padding: 10px 20px;
+            margin-top: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+    #pause-btn {
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+        #pause-btn:hover {
+            background-color: #0056b3;
+        }
+</style>
+
+<h1 style="text-align:center;">Testimonials</h1>
+
+<div style="text-align:right; margin-bottom: 20px;">
+    <button id="pause-btn">Pause Reorder</button>
+</div>
+
+<div id="testimonials-list">
+    @foreach (var t in Model.Testimonials)
+    {
+        <div class="testimonial-card" data-id="@t.Id" data-userid="@t.UserId">
+            <img src="@t.ProfileImage" alt="@t.UserName">
+            <strong>@t.UserName</strong>
+            <p>@t.Text</p>
+            @if (t.UserId.ToString() == currentUserId)
+            {
+                <button class="delete-btn">Delete</button>
+            }
+        </div>
+    }
+</div>
+
+<hr />
+
+<h2 style="text-align:center;">Share Your Testimony</h2>
+
+<form id="testimonial-form">
+    <input type="hidden" id="antiforgery-token" value="@token" />
+    <div style="margin-bottom:10px;">
+        <label>Your Testimony:</label><br />
+        <textarea name="Text" id="text-input" rows="4" required></textarea>
+    </div>
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    const testimonialsList = document.getElementById("testimonials-list");
+    let reorderPaused = false;
+
+    
+    const reorderInterval = setInterval(() => {
+        if (!reorderPaused) {
+            const cards = Array.from(testimonialsList.children);
+            while (cards.length) {
+                const randomIndex = Math.floor(Math.random() * cards.length);
+                testimonialsList.appendChild(cards.splice(randomIndex, 1)[0]);
+            }
+        }
+    }, 15000);
+
+    
+    document.getElementById("pause-btn").addEventListener("click", function() {
+        reorderPaused = !reorderPaused;
+        this.textContent = reorderPaused ? "Resume Reorder" : "Pause Reorder";
+    });
+
+    
+    document.getElementById("testimonial-form").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const text = document.getElementById("text-input").value.trim();
+        if (!text) return;
+        const token = document.getElementById("antiforgery-token").value;
+
+        const response = await fetch("/Testimonials/Index", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "RequestVerificationToken": token
+            },
+            body: JSON.stringify({ text })
+        });
+
+        if (response.ok) {
+            const testimonial = await response.json();
+            addTestimonialCard(testimonial);
+            document.getElementById("text-input").value = "";
+        } else {
+            const error = await response.json();
+            alert(error.error || "Error submitting testimony.");
+        }
+    });
+
+    
+    function addTestimonialCard(testimonial) {
+        const card = document.createElement("div");
+        card.className = "testimonial-card";
+        card.dataset.id = testimonial.id;
+        card.dataset.userid = testimonial.userId;
+        card.innerHTML = `
+            <img src="${testimonial.profileImage}" alt="${testimonial.userName}">
+            <strong>${testimonial.userName}</strong>
+            <p>${testimonial.text}</p>
+            <button class="delete-btn">Delete</button>
+        `;
+        testimonialsList.prepend(card);
+    }
+
+    
+    testimonialsList.addEventListener("click", async function(e) {
+        if (e.target.classList.contains("delete-btn")) {
+            const card = e.target.closest(".testimonial-card");
+            const id = parseInt(card.dataset.id);
+            if (!confirm("Are you sure you want to delete this testimonial?")) return;
+
+            const token = document.getElementById("antiforgery-token").value;
+
+            const response = await fetch("/Testimonials/Index?handler=Delete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
+                body: JSON.stringify(id)
+            });
+
+            if (response.ok) {
+                testimonialsList.removeChild(card);
+            } else {
+                const error = await response.json();
+                alert(error.error || "Error deleting testimonial.");
+            }
+        }
+    });
+</script>

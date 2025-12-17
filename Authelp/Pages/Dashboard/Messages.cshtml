@@ -1,0 +1,54 @@
+﻿@page
+@model Authelp.Pages.Dashboard.MessagesModel
+@{
+    ViewData["Title"] = "Messages";
+}
+
+<h2>Messages</h2>
+
+<div class="mb-2">
+
+    <a class="btn btn-primary" asp-page="/Messages" asp-route-ChatWithId="3">
+        Chat
+    </a>
+</div>
+
+
+
+@if (!Model.Conversations.Any())
+{
+    <p>No messages yet.</p>
+}
+else
+{
+    <div style="display:flex; flex-direction:column; gap:10px;">
+        @foreach (var convo in Model.Conversations)
+        {
+            <div style="padding:10px; border:1px solid #ccc; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <a asp-page="/Messages" asp-route-ChatWithId="@convo.UserId" style="font-weight:bold; text-decoration:none;">
+                        @convo.UserName
+                    </a>
+                    <p style="margin:2px 0; color:gray;">
+                        @{
+                            var msg = convo.LastMessage ?? string.Empty;
+                            var displayMsg = msg.Length > 50 ? msg.Substring(0, 50) + "..." : msg;
+                        }
+                        @displayMsg
+                    </p>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-size:0.8rem; color:gray;">
+                        @convo.LastTime.ToLocalTime().ToString("g")
+                    </span>
+                    @if (convo.UnreadCount > 0)
+                    {
+                        <div style="background:red; color:white; border-radius:50%; width:20px; height:20px; display:inline-flex; justify-content:center; align-items:center; margin-top:5px;">
+                            @convo.UnreadCount
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

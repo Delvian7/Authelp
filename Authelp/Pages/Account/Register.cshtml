@@ -1,0 +1,39 @@
+﻿@page
+@model Authelp.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h2>Register</h2>
+<form method="post">
+    <div>
+        <label>Name</label><br />
+        <input asp-for="Name" />
+    </div>
+    <div>
+        <label>Email</label><br />
+        <input asp-for="Email" />
+    </div>
+    <div>
+        <label>Phone</label><br />
+        <input asp-for="Phone" />
+    </div>
+    <div>
+        <label>Password</label><br />
+        <input asp-for="Password" type="password" />
+    </div>
+    <div>
+        <label>Role</label><br />
+        <select asp-for="Role">
+            <option value="parent">Parent</option>
+            <option value="helper">Helper</option>
+        </select>
+    </div>
+    <div id="parent-fields">
+        <label>Child Condition</label><br />
+        <input asp-for="ChildCondition" />
+    </div>
+    <div style="margin-top:12px;">
+        <button type="submit">Register</button>
+    </div>
+</form>
